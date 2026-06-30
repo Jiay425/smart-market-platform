@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.smartmarket.infrastructure.dao.IMarketingStrategyRouterDao">
+
+    <resultMap id="dataMap" type="com.smartmarket.infrastructure.dao.po.MarketingStrategyRouter">
+        <id column="id" property="id"/>
+        <result column="activity_id" property="activityId"/>
+        <result column="user_segment" property="userSegment"/>
+        <result column="risk_level" property="riskLevel"/>
+        <result column="strategy_id" property="strategyId"/>
+        <result column="priority" property="priority"/>
+        <result column="enabled" property="enabled"/>
+        <result column="router_desc" property="routerDesc"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="queryMarketingStrategyRouter" parameterType="com.smartmarket.infrastructure.dao.po.MarketingStrategyRouter" resultMap="dataMap">
+        select id, activity_id, user_segment, risk_level, strategy_id, priority, enabled,
+               router_desc, create_time, update_time
+        from marketing_strategy_router
+        where activity_id = #{activityId}
+          and user_segment = #{userSegment}
+          and risk_level = #{riskLevel}
+          and enabled = 1
+        order by priority asc, id asc
+        limit 1
+    </select>
+
+</mapper>

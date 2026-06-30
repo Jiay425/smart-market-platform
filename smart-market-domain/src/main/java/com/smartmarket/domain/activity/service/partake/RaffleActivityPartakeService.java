@@ -4,8 +4,12 @@ import com.smartmarket.domain.activity.model.aggregate.CreatePartakeOrderAggrega
 import com.smartmarket.domain.activity.model.entity.*;
 import com.smartmarket.domain.activity.model.valobj.UserRaffleOrderStateVO;
 import com.smartmarket.domain.activity.repository.IActivityRepository;
+import com.smartmarket.domain.marketing.model.entity.MarketingRouteRequestEntity;
+import com.smartmarket.domain.marketing.model.entity.MarketingRouteResultEntity;
+import com.smartmarket.domain.marketing.service.IMarketingStrategyRouter;
 import com.smartmarket.types.enums.ResponseCode;
 import com.smartmarket.types.exception.AppException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 
@@ -17,14 +21,17 @@ import java.util.Date;
  * @description
  * @create 2024-04-05 07:53
  */
+@Slf4j
 @Service
 public class RaffleActivityPartakeService extends AbstractRaffleActivityPartake{
 
     private final SimpleDateFormat dateFormatMonth = new SimpleDateFormat("yyyy-MM");
     private final SimpleDateFormat dateFormatDay = new SimpleDateFormat("yyyy-MM-dd");
+    private final IMarketingStrategyRouter marketingStrategyRouter;
 
-    public RaffleActivityPartakeService(IActivityRepository activityRepository) {
+    public RaffleActivityPartakeService(IActivityRepository activityRepository, IMarketingStrategyRouter marketingStrategyRouter) {
         super(activityRepository);
+        this.marketingStrategyRouter = marketingStrategyRouter;
     }
 
     @Override
@@ -90,12 +97,20 @@ public class RaffleActivityPartakeService extends AbstractRaffleActivityPartake{
     @Override
     protected UserRaffleOrderEntity buildUserRaffleOrder(String userId, Long activityId, Date currentDate) {
         ActivityEntity activityEntity = activityRepository.queryRaffleActivityByActivityId(activityId);
+        MarketingRouteResultEntity routeResult = marketingStrategyRouter.route(MarketingRouteRequestEntity.builder()
+                .userId(userId)
+                .activityId(activityId)
+                .defaultStrategyId(activityEntity.getStrategyId())
+                .build());
+        log.info("营销策略路由完成 userId:{} activityId:{} defaultStrategyId:{} routedStrategyId:{} userSegment:{} riskLevel:{}",
+                userId, activityId, routeResult.getDefaultStrategyId(), routeResult.getRoutedStrategyId(),
+                routeResult.getUserSegment(), routeResult.getRiskLevel());
         // 构建订单
         UserRaffleOrderEntity userRaffleOrder = new UserRaffleOrderEntity();
         userRaffleOrder.setUserId(userId);
         userRaffleOrder.setActivityId(activityId);
         userRaffleOrder.setActivityName(activityEntity.getActivityName());
-        userRaffleOrder.setStrategyId(activityEntity.getStrategyId());
+        userRaffleOrder.setStrategyId(routeResult.getRoutedStrategyId());
         userRaffleOrder.setOrderId(RandomStringUtils.randomNumeric(12));
         userRaffleOrder.setOrderTime(currentDate);
         userRaffleOrder.setOrderState(UserRaffleOrderStateVO.create);

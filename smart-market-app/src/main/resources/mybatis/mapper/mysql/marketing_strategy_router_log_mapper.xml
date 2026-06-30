@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.smartmarket.infrastructure.dao.IMarketingStrategyRouterLogDao">
+
+    <insert id="insert" parameterType="com.smartmarket.infrastructure.dao.po.MarketingStrategyRouterLog">
+        insert into marketing_strategy_router_log(
+            user_id, activity_id, default_strategy_id, routed_strategy_id,
+            user_segment, risk_level, route_desc, create_time
+        ) values (
+            #{userId}, #{activityId}, #{defaultStrategyId}, #{routedStrategyId},
+            #{userSegment}, #{riskLevel}, #{routeDesc}, now()
+        )
+    </insert>
+
+</mapper>

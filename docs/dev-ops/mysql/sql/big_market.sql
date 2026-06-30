@@ -421,6 +421,129 @@ UNLOCK TABLES;
 
 
 
+# 转储表 user_tag
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `user_tag`;
+
+CREATE TABLE `user_tag` (
+  `id` bigint(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
+  `user_id` varchar(32) NOT NULL COMMENT '用户ID',
+  `tag_code` varchar(32) NOT NULL COMMENT '用户标签；NEW_USER、ACTIVE_USER、SILENT_USER、HIGH_VALUE_USER、RISK_USER',
+  `risk_level` varchar(16) NOT NULL DEFAULT 'LOW' COMMENT '风险等级；LOW、MEDIUM、HIGH',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_user_id` (`user_id`),
+  KEY `idx_tag_risk` (`tag_code`,`risk_level`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户营销标签';
+
+LOCK TABLES `user_tag` WRITE;
+/*!40000 ALTER TABLE `user_tag` DISABLE KEYS */;
+
+INSERT INTO `user_tag` (`id`, `user_id`, `tag_code`, `risk_level`, `create_time`, `update_time`)
+VALUES
+    (1,'xiaofuge','ACTIVE_USER','LOW','2024-06-22 10:00:00','2024-06-22 10:00:00'),
+    (2,'risk_user','RISK_USER','HIGH','2024-06-22 10:00:00','2024-06-22 10:00:00'),
+    (3,'new_user','NEW_USER','LOW','2024-06-22 10:00:00','2024-06-22 10:00:00'),
+    (4,'high_value_user','HIGH_VALUE_USER','LOW','2024-06-22 10:00:00','2024-06-22 10:00:00'),
+    (5,'silent_user','SILENT_USER','LOW','2024-06-22 10:00:00','2024-06-22 10:00:00');
+
+/*!40000 ALTER TABLE `user_tag` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+# 转储表 user_behavior_stat
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `user_behavior_stat`;
+
+CREATE TABLE `user_behavior_stat` (
+  `id` bigint(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
+  `user_id` varchar(32) NOT NULL COMMENT '用户ID',
+  `total_raffle_count` int(11) NOT NULL DEFAULT '0' COMMENT '累计抽奖次数',
+  `day_raffle_count` int(11) NOT NULL DEFAULT '0' COMMENT '当日抽奖次数',
+  `continuous_sign_days` int(11) NOT NULL DEFAULT '0' COMMENT '连续签到天数',
+  `available_credit_amount` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT '可用积分金额',
+  `last_active_time` datetime DEFAULT NULL COMMENT '最近活跃时间',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_user_id` (`user_id`),
+  KEY `idx_last_active_time` (`last_active_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户行为统计';
+
+LOCK TABLES `user_behavior_stat` WRITE;
+/*!40000 ALTER TABLE `user_behavior_stat` DISABLE KEYS */;
+
+INSERT INTO `user_behavior_stat` (`id`, `user_id`, `total_raffle_count`, `day_raffle_count`, `continuous_sign_days`, `available_credit_amount`, `last_active_time`, `create_time`, `update_time`)
+VALUES
+    (1,'xiaofuge',8,1,5,120.00,'2024-06-22 10:00:00','2024-06-22 10:00:00','2024-06-22 10:00:00'),
+    (2,'risk_user',60,25,0,5.00,'2024-06-22 10:00:00','2024-06-22 10:00:00','2024-06-22 10:00:00'),
+    (3,'new_user',0,0,0,0.00,NULL,'2024-06-22 10:00:00','2024-06-22 10:00:00'),
+    (4,'high_value_user',30,1,20,1800.00,'2024-06-22 10:00:00','2024-06-22 10:00:00','2024-06-22 10:00:00'),
+    (5,'silent_user',12,0,0,20.00,'2024-04-01 10:00:00','2024-06-22 10:00:00','2024-06-22 10:00:00');
+
+/*!40000 ALTER TABLE `user_behavior_stat` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+# 转储表 marketing_strategy_router
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `marketing_strategy_router`;
+
+CREATE TABLE `marketing_strategy_router` (
+  `id` bigint(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
+  `activity_id` bigint(12) NOT NULL COMMENT '活动ID',
+  `user_segment` varchar(32) NOT NULL COMMENT '用户分层',
+  `risk_level` varchar(16) NOT NULL COMMENT '风险等级',
+  `strategy_id` bigint(8) NOT NULL COMMENT '路由后的抽奖策略ID',
+  `priority` int(4) NOT NULL DEFAULT '100' COMMENT '优先级，数值越小优先级越高',
+  `enabled` tinyint(1) NOT NULL DEFAULT '1' COMMENT '是否启用；0-否、1-是',
+  `router_desc` varchar(128) NOT NULL COMMENT '路由描述',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_activity_segment_risk` (`activity_id`,`user_segment`,`risk_level`,`enabled`,`priority`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='营销策略路由配置';
+
+LOCK TABLES `marketing_strategy_router` WRITE;
+/*!40000 ALTER TABLE `marketing_strategy_router` DISABLE KEYS */;
+
+INSERT INTO `marketing_strategy_router` (`id`, `activity_id`, `user_segment`, `risk_level`, `strategy_id`, `priority`, `enabled`, `router_desc`, `create_time`, `update_time`)
+VALUES
+    (1,100301,'NEW_USER','LOW',100001,10,1,'新用户保护奖池，提高小额奖励体验','2024-06-22 10:00:00','2024-06-22 10:00:00'),
+    (2,100301,'ACTIVE_USER','LOW',100006,20,1,'活跃用户标准奖池','2024-06-22 10:00:00','2024-06-22 10:00:00'),
+    (3,100301,'SILENT_USER','LOW',100001,30,1,'沉默用户召回奖池，提升优惠券与次数类奖励','2024-06-22 10:00:00','2024-06-22 10:00:00'),
+    (4,100301,'HIGH_VALUE_USER','LOW',100006,40,1,'高价值用户专属权益奖池','2024-06-22 10:00:00','2024-06-22 10:00:00'),
+    (5,100301,'RISK_USER','HIGH',100002,1,1,'风险用户降权奖池，屏蔽高价值奖品','2024-06-22 10:00:00','2024-06-22 10:00:00');
+
+/*!40000 ALTER TABLE `marketing_strategy_router` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+# 转储表 marketing_strategy_router_log
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `marketing_strategy_router_log`;
+
+CREATE TABLE `marketing_strategy_router_log` (
+  `id` bigint(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
+  `user_id` varchar(32) NOT NULL COMMENT '用户ID',
+  `activity_id` bigint(12) NOT NULL COMMENT '活动ID',
+  `default_strategy_id` bigint(8) NOT NULL COMMENT '活动默认策略ID',
+  `routed_strategy_id` bigint(8) NOT NULL COMMENT '实际执行策略ID',
+  `user_segment` varchar(32) NOT NULL COMMENT '用户分层',
+  `risk_level` varchar(16) NOT NULL COMMENT '风险等级',
+  `route_desc` varchar(128) NOT NULL COMMENT '路由描述',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_user_activity` (`user_id`,`activity_id`),
+  KEY `idx_activity_strategy` (`activity_id`,`routed_strategy_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='营销策略路由日志';
+
+
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

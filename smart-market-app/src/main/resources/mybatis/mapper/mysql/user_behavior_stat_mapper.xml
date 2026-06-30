@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.smartmarket.infrastructure.dao.IUserBehaviorStatDao">
+
+    <resultMap id="dataMap" type="com.smartmarket.infrastructure.dao.po.UserBehaviorStat">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="total_raffle_count" property="totalRaffleCount"/>
+        <result column="day_raffle_count" property="dayRaffleCount"/>
+        <result column="continuous_sign_days" property="continuousSignDays"/>
+        <result column="available_credit_amount" property="availableCreditAmount"/>
+        <result column="last_active_time" property="lastActiveTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="queryUserBehaviorStat" parameterType="java.lang.String" resultMap="dataMap">
+        select id, user_id, total_raffle_count, day_raffle_count, continuous_sign_days,
+               available_credit_amount, last_active_time, create_time, update_time
+        from user_behavior_stat
+        where user_id = #{userId}
+        limit 1
+    </select>
+
+</mapper>
