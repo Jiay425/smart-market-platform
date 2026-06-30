@@ -1,0 +1,7 @@
+spring:
+  config:
+    name: smart-market-app
+  profiles:
+    active: dev
+
+

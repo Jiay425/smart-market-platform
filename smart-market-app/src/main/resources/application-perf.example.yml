@@ -1,0 +1,73 @@
+server:
+  port: 8091
+  tomcat:
+    threads:
+      max: 1000
+      min-spare: 200
+    accept-count: 2000
+
+spring:
+  rabbitmq:
+    addresses: 127.0.0.1
+    port: 5672
+    username: ${RABBITMQ_USERNAME:admin}
+    password: ${RABBITMQ_PASSWORD:change_me}
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    publisher-confirm-timeout: 5000
+    template:
+      mandatory: true
+    listener:
+      simple:
+        auto-startup: false
+      direct:
+        auto-startup: false
+    topic:
+      activity_sku_stock_zero: activity_sku_stock_zero
+      send_award: send_award
+      send_rebate: send_rebate
+      credit_adjust_success: credit_adjust_success
+      dead_letter_suffix: .dlq
+    dlq:
+      compensate:
+        max-messages-per-queue: 10
+  elasticsearch:
+    datasource:
+      url: jdbc:es://http://127.0.0.1:9200
+
+mini-db-router:
+  jdbc:
+    datasource:
+      db00:
+        url: jdbc:mysql://127.0.0.1:13306/big_market?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+      db01:
+        url: jdbc:mysql://127.0.0.1:13306/big_market_01?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+      db02:
+        url: jdbc:mysql://127.0.0.1:13306/big_market_02?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+
+redis:
+  sdk:
+    config:
+      host: 127.0.0.1
+      port: 16379
+      pool-size: 512
+      min-idle-size: 128
+      connect-timeout: 3000
+      retry-attempts: 1
+      retry-interval: 200
+      ping-interval: 0
+
+xxl:
+  job:
+    admin:
+      addresses:
+
+perf:
+  xxl-job:
+    enabled: false
+  dubbo:
+    enabled: false
+  stock-queue:
+    enabled: false
+
+
